@@ -1,34 +1,26 @@
+import ascii85
 import re
 
-import ascii85
-
 def read_payload(inp):
-    return ascii85.decode(re.sub(r'\s+', '', read_between(inp, '<~', '~>')))
+    return ascii85.decode(re.sub(r'\s+', '', between(inp.read(), '<~', '~>')))
 
-def read_between(inp, start, end):
-    chunks = None
-    for line in inp:
-        if chunks is None:
-            if start in line:
-                chunk = line.split(start, 2)[1]
-                if end in chunk:
-                    return chunk.split(end, 2)[0]
-                else:
-                    chunks = [chunk]
-        else:
-            if end in line:
-                chunks.append(line.split(end, 2)[0])
-                return ''.join(chunks)
-            else:
-                chunks.append(line)
-    return None
+def between(text, start, end):
+    i = text.index(start) + len(start)
+    j = text.index(end, i)
+    return text[i : j]
 
 def write_payload(out, data):
     out.write('==[ Payload ]===============================================\n')
     out.write('\n')
-    write_lines(out, '<~' + ascii85.encode(data) + '~>')
+    write_line(out, ['<~', *ascii85.encode(data), '~>'], 60)
     out.write('\n')
 
-def write_lines(out, text, width = 60):
-    for i in range(0, len(text), width):
-        out.write(text[i : i + width] + '\n')
+def write_line(out, chunks, width):
+    x = 0
+    for chunk in chunks:
+        if x + len(chunk) > width:
+            out.write('\n')
+            x = 0
+        out.write(chunk)
+        x += len(chunk)
+    out.write('\n')

@@ -1,5 +1,4 @@
 import html
-import re
 import sys
 
 import click
@@ -15,13 +14,7 @@ def main():
 def fetch():
     res = requests.get('https://www.tomdalling.com/toms-data-onion/')
     res.raise_for_status()
-    sys.stdout.write(extract_pre(res.text))
-
-def extract_pre(text):
-    match = re.search(r'<pre>\n?(.*?)</pre>', text, re.DOTALL | re.IGNORECASE)
-    if match:
-        return html.unescape(match[1])
-    raise ValueError('missing pre tag')
+    sys.stdout.write(html.unescape(onion.between(res.text, '<pre>\n', '</pre>')))
 
 @main.command()
 def peel():
