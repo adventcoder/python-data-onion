@@ -2,12 +2,11 @@ import ascii85
 import re
 
 def read_payload(inp):
-    return ascii85.decode(re.sub(r'\s+', '', between(inp.read(), '<~', '~>')))
+    return extract_payload(inp.read())
 
-def between(text, start, end):
-    i = text.index(start) + len(start)
-    j = text.index(end, i)
-    return text[i : j]
+def extract_payload(text):
+    if match := re.search(r'<~(.*?)~>', text, re.DOTALL):
+        return ascii85.decode(re.sub(r'\s+', '', match[1]))
 
 def write_payload(out, data):
     out.write('==[ Payload ]===============================================\n')

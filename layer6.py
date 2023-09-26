@@ -12,12 +12,12 @@ def main():
 @main.command()
 @click.option('--emulate', is_flag=True)
 def peel(emulate):
+    code = onion.read_payload(sys.stdin)
     if emulate:
-        vm = TomtelVM(onion.read_payload(sys.stdin))
+        vm = TomtelVM(code)
         vm.run()
         sys.stdout.write(vm.out.decode('ascii'))
     else:
-        code = onion.read_payload(sys.stdin)
         ciphertext = code[143 : -367]
         table = code[-291 : -35]
         key = code[-25 : -9]

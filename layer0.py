@@ -1,4 +1,5 @@
 import html
+import re
 import sys
 
 import click
@@ -14,7 +15,11 @@ def main():
 def fetch():
     res = requests.get('https://www.tomdalling.com/toms-data-onion/')
     res.raise_for_status()
-    sys.stdout.write(html.unescape(onion.between(res.text, '<pre>\n', '</pre>')))
+    sys.stdout.write(extract_pre(res.text))
+
+def extract_pre(text):
+    if match := re.search(r'<pre>\n?(.*?)</pre>', text, re.DOTALL | re.IGNORECASE):
+        return html.unescape(match[1])
 
 @main.command()
 def peel():
