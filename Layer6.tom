@@ -1,0 +1,152 @@
+    MVI32 ptr <- :CIPHERTEXT
+LOOP:
+    MVI32 lb <- :KEY
+    MVI32 lc <- :ROTATE
+XOR:
+    MVI c <- 15
+    MV32 la <- ptr
+XOR_LOOP:
+    MV32 ptr <- lb
+    MV b <- (ptr+c)
+    MV32 ptr <- la
+    MV a <- (ptr+c)
+    XOR a <- b
+    MV (ptr+c) <- a
+    MV a <- c
+    MVI b <- 0
+    CMP
+    MVI b <- 1
+    SUB a <- b
+    MV c <- a
+    JNZ :XOR_LOOP
+    MV32 pc <- lc
+ROTATE:
+    MVI c <- 1
+    MV a <- (ptr+c)
+    MVI c <- 5
+    MV b <- (ptr+c)
+    MVI c <- 9
+    MV d <- (ptr+c)
+    MVI c <- 13
+    MV e <- (ptr+c)
+    MVI c <- 13
+    MV (ptr+c) <- a
+    MVI c <- 1
+    MV (ptr+c) <- b
+    MVI c <- 5
+    MV (ptr+c) <- d
+    MVI c <- 9
+    MV (ptr+c) <- e
+    MVI c <- 2
+    MV a <- (ptr+c)
+    MVI c <- 6
+    MV b <- (ptr+c)
+    MVI c <- 10
+    MV d <- (ptr+c)
+    MVI c <- 14
+    MV e <- (ptr+c)
+    MVI c <- 10
+    MV (ptr+c) <- a
+    MVI c <- 14
+    MV (ptr+c) <- b
+    MVI c <- 2
+    MV (ptr+c) <- d
+    MVI c <- 6
+    MV (ptr+c) <- e
+    MVI c <- 3
+    MV a <- (ptr+c)
+    MVI c <- 7
+    MV b <- (ptr+c)
+    MVI c <- 11
+    MV d <- (ptr+c)
+    MVI c <- 15
+    MV e <- (ptr+c)
+    MVI c <- 7
+    MV (ptr+c) <- a
+    MVI c <- 11
+    MV (ptr+c) <- b
+    MVI c <- 15
+    MV (ptr+c) <- d
+    MVI c <- 3
+    MV (ptr+c) <- e
+    MVI32 lc <- :OUTPUT
+SUB:
+    MVI c <- 15
+    MV32 la <- ptr
+SUB_LOOP:
+    MV d <- c
+    MV c <- (ptr+c)
+    MVI32 ptr <- :TABLE
+    MV a <- (ptr+c)
+    MV32 ptr <- la
+    MV c <- d
+    MV (ptr+c) <- a
+    MV a <- c
+    MVI b <- 0
+    CMP
+    MVI b <- 1
+    SUB a <- b
+    MV c <- a
+    JNZ :SUB_LOOP
+    MV32 pc <- lc
+CIPHERTEXT:
+    DATA ciphertext
+OUTPUT:
+    MVI c <- 0
+    MV a <- (ptr+c)
+    MVI b <- 0
+    CMP
+    JEZ :END
+    MVI b <- 1
+    ADD a <- b
+    MV d <- a
+    MVI c <- 1
+OUTPUT_LOOP:
+    MV a <- (ptr+c)
+    OUT a
+    MV a <- c
+    MVI b <- 1
+    ADD a <- b
+    MV c <- a
+    MV b <- d
+    CMP
+    JNZ :OUTPUT_LOOP
+    MV32 lb <- ptr
+    MVI32 ptr <- :KEY
+    MVI c <- 7
+REVERSE_LOOP:
+    MV d <- (ptr+c)
+    MVI a <- 15
+    MV b <- c
+    SUB a <- b
+    MV c <- a
+    MV e <- (ptr+c)
+    MV (ptr+c) <- d
+    MVI a <- 15
+    MV b <- c
+    SUB a <- b
+    MV c <- a
+    MV (ptr+c) <- e
+    MV a <- c
+    MVI b <- 0
+    CMP
+    MVI b <- 1
+    SUB a <- b
+    MV c <- a
+    JNZ :REVERSE_LOOP
+CALL_XOR:
+    MVI32 lc <- :CALL_SUB
+    MVI32 pc <- :XOR
+TABLE:
+    DATA table
+CALL_SUB:
+    MVI32 lc <- :INCREMENT
+    MVI32 pc <- :SUB
+KEY:
+    DATA key
+INCREMENT:
+    MV32 ptr <- lb
+    APTR 16
+    MVI32 pc <- :LOOP
+END:
+    HALT
