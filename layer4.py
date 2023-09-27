@@ -73,17 +73,16 @@ def udp_checksum(from_addr, to_addr, header, data):
     pseudo_header[4 : 8] = to_addr
     pseudo_header[9] = 17
     pseudo_header[10 : 12] = (len(header) + len(data)).to_bytes(2, 'big')
-    return checksum(pseudo_header, header, data)
+    return checksum(pseudo_header + header + data)
 
-def checksum(*chunks):
+def checksum(data):
     sum = 0
-    for chunk in chunks:
-        for i in range(0, len(chunk), 2):
-            sum += chunk[i] << 8
-            if i + 1 < len(chunk):
-                sum += chunk[i + 1]
+    for i in range(0, data, 2):
+        sum += data[i] << 8
+        if i + 1 < len(data):
+            sum += data[i + 1]
     sum = (sum & 0xFFFF) + (sum >> 16)
-    return (~sum & 0xFFFF)
+    return ~sum & 0xFFFF
 
 if __name__ == '__main__':
     main()
