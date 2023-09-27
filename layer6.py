@@ -267,7 +267,7 @@ class DallingCipher:
         while True:
             block = self.decrypt_block(inp[i : i + 16])
             self.next_key(block)
-            if block[1] == 0:
+            if block[0] == 0:
                 break
             out.extend(block[1:][:block[0]])
             i += 16
